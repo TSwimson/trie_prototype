@@ -1,21 +1,24 @@
 Trie = function(){
   this.characters = {};
+  this.isWord = false;
 };
-
-Trie.prototype.learn = function(word, index){
   // This function should add the given word,
   // starting from the given index,
   // to this Trie.
-
-  // It will be recursive.  It will tell
-  // the correct child of this Trie to learn the word
-  // starting from a later index.
-
-  // Consider what the learn function should do
-  // when it reaches the end of the word?
-  // A word does not necessarily end at a leaf.
-  // You must mark nodes which are the ends of words,
-  // so that the words can be reconstructed later.
+Trie.prototype.learn = function(word, index){
+  index = index || 0;
+  if (word.length <= index) {
+    this.isWord = true;
+    return;
+  }
+  if (this.characters[word[index]] === undefined) {
+    this.characters[word[index]] = new Trie();
+    this.characters[word[index]].learn(word, index + 1);
+  } else
+  {
+    this.characters[word[index]].learn(word, index + 1);
+  }
+  return true;
 };
 
 Trie.prototype.getWords = function(words, currentWord){
@@ -23,6 +26,19 @@ Trie.prototype.getWords = function(words, currentWord){
   // contained in this Trie.
   // it will use currentWord as a prefix,
   // since a Trie doesn't know about its parents.
+
+  currentWord = currentWord || ''; //init currentWord
+  words = words || [];              //and  words
+
+  if (this.isWord) {                 // if this is a word add it to the words array
+    words.push(currentWord);
+  }
+
+  $.each(this.characters, function(character, charTrie) {   //go through each character
+    words.concat(charTrie.getWords(words, currentWord + character));   //add its words and pass in the currentWord + their letter
+  });
+
+  return words;  //return all the words in this trie
 };
 
 Trie.prototype.find = function(word, index){
@@ -37,3 +53,13 @@ Trie.prototype.autoComplete = function(prefix){
   // for a given prefix.
   // It should use find and getWords.
 };
+
+window.t = new Trie();
+t.learn("pie");
+t.learn("pies");
+t.learn("pipe");
+t.learn("bow");
+
+
+
+
