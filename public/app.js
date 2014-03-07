@@ -23,7 +23,6 @@ App.Routers.Main = Backbone.Router.extend({
   main: function(search) {
     search = search || '';
     $(function(){
-      
       $('#search_bar').on('input', function() {
         App.showAutocompletes();
       });
