@@ -4,18 +4,19 @@ window.App = {
   Views: {},
   Routers: {},
   initialize: function() {
-    this.router = new this.Routers.Main();
+    //this.router = new this.Routers.Main();
     Backbone.history.start({pushState: true});
 
     App.autocompleter = new Autocompleter();
     var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
     ws.onmessage = function(m) {
-      autocompleter.add(m.data);
+      App.autocompleter.add(m.data);
     };
-
   }
 };
-setTimeout(function(){$(document).ready(function(){
+$(function(){
   App.initialize();
-});}, 500);
+});
+
+
 

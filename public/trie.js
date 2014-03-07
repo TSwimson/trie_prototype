@@ -35,7 +35,9 @@ Trie.prototype.getWords = function(words, currentWord){
   }
 
   $.each(this.characters, function(character, charTrie) {   //go through each character
-    words.concat(charTrie.getWords(words, currentWord + character));   //add its words and pass in the currentWord + their letter
+    if(words.length < 2000) {
+      words.concat(charTrie.getWords(words, currentWord + character));   //add its words and pass in the currentWord + their letter
+    }
   });
 
   return words;  //return all the words in this trie
@@ -46,19 +48,26 @@ Trie.prototype.find = function(word, index){
   // which corresponds to the end of the passed in word.
 
   // Be sure to consider what happens if the word is not in this Trie.
+  index = index || 0;
+  if (word.length <= index){
+    return this;
+  }
+  if (this.characters[word[index]] === undefined) {
+    return false;
+  }
+  return this.characters[word[index]].find(word, index + 1);
 };
 
 Trie.prototype.autoComplete = function(prefix){
   // This function will return all completions 
   // for a given prefix.
   // It should use find and getWords.
+  var found = this.find(prefix);
+  if (found) {
+    return found.getWords([], prefix);
+  }
+  return [];
 };
-
-window.t = new Trie();
-t.learn("pie");
-t.learn("pies");
-t.learn("pipe");
-t.learn("bow");
 
 
 
