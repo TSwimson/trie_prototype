@@ -1,3 +1,5 @@
+require 'bundler/setup'
+
 require 'pry'
 require 'sinatra'
 require 'sinatra/reloader'
