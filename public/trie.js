@@ -35,7 +35,7 @@ Trie.prototype.getWords = function(words, currentWord){
   }
 
   $.each(this.characters, function(character, charTrie) {   //go through each character
-    if(words.length < 2000) {
+    if(words.length < 1000) {
       words.concat(charTrie.getWords(words, currentWord + character));   //add its words and pass in the currentWord + their letter
     }
   });
