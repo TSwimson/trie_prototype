@@ -68,7 +68,3 @@ Trie.prototype.autoComplete = function(prefix){
   }
   return [];
 };
-
-
-
-
