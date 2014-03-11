@@ -4,42 +4,45 @@ Trie = function(isWord){
 
 };
 
-Trie.prototype.learn = function(word, index) {
+Trie.prototype.learn = function(word) {
   if (word.length > 0) {
-  if (this.children === undefined){
-    this.children = {};
-  }
-  index = index || 0;
-  var theRightChar;
-  var set = false;
-  var _this = this;
-  _.each(this.children, function(characterTrie, character) {
-    if (character[index] === word[index]) {
-      set = true;
-      theRightChar = character;
-      for(index += 1; character[index] === word[index]; index++){
-      }
-      var leftHalf = theRightChar.substring(0,index);
-      var rightHalf = theRightChar.substring(index);
-      var wordRightHalf = word.substring(index);
-      if(_this.children[leftHalf] === undefined) {
-        _this.children[leftHalf] = new Trie(leftHalf === theRightChar);
-      }
-      if (wordRightHalf.length > 0) {
-        _this.children[leftHalf].learn(wordRightHalf);
-      } else {
-        _this.children[leftHalf].isWord = true;
-      }
-      _this.children[leftHalf].learn(rightHalf);
-      if (theRightChar !== leftHalf) {
-        delete _this.children[theRightChar];
+    if (this.children === undefined){
+      this.children = {};
+    }
+
+    var index = 0;
+    var set = false;
+
+    for (var childStr in this.children) {//, function(characterTrie, character) {
+      if (childStr[index] === word[index]) {
+        set = true;
+
+        for(index += 1; childStr[index] === word[index]; index++){
+        }
+
+        var leftHalf = childStr.substring(0,index);
+        var rightHalf = childStr.substring(index);
+        var wordRightHalf = word.substring(index);
+
+        if(this.children[leftHalf] === undefined) {
+          this.children[leftHalf] = this.children[childStr];//new Trie(leftHalf === childStr);
+        }
+        if (wordRightHalf.length > 0) {
+          this.children[leftHalf].learn(wordRightHalf);
+        } else {
+          this.children[leftHalf].isWord = true;
+        }
+        this.children[leftHalf].learn(rightHalf);
+        if (childStr !== leftHalf) {
+          delete this.children[childStr];
+        }
+        break;
       }
     }
-  });
-  if (!set) {
-    this.children[word] = new Trie(true);
+    if (!set) {
+      this.children[word] = new Trie(true);
+    }
   }
-}
 };
 
 Trie.prototype.find = function(word, index) {
