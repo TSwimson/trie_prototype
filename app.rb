@@ -15,7 +15,7 @@ get '/*'  do
     request.websocket do |ws|
       ws.onopen do
         settings.sockets << ws
-        File.open("tiny_half").each_line do |l|
+        File.open("small_titles").each_line do |l|
           ws.send(l.downcase.chomp)
           sleep(0.00001)
         end

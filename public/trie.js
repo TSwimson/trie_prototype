@@ -13,8 +13,11 @@ Trie.prototype.learn = function(word) {
     var index = 0;
     var set = false;
 
-    for (var childStr in this.children) {//, function(characterTrie, character) {
+    for (var childStr in this.children) {
       if (childStr[index] === word[index]) {
+        if (childStr === word) {
+          return;
+        }
         set = true;
 
         for(index += 1; childStr[index] === word[index]; index++){
@@ -25,17 +28,23 @@ Trie.prototype.learn = function(word) {
         var wordRightHalf = word.substring(index);
 
         if(this.children[leftHalf] === undefined) {
-          this.children[leftHalf] = this.children[childStr];//new Trie(leftHalf === childStr);
+          if(rightHalf.length > 0) {
+            this.children[leftHalf] = new Trie();
+            this.children[leftHalf].learn(rightHalf);
+            this.children[leftHalf].children[rightHalf] = this.children[childStr];
+            delete this.children[childStr];
+          }
+          else {
+            this.children[leftHalf] = this.children[childStr];
+            delete this.children[childStr];
+          }
         }
         if (wordRightHalf.length > 0) {
           this.children[leftHalf].learn(wordRightHalf);
         } else {
           this.children[leftHalf].isWord = true;
         }
-        this.children[leftHalf].learn(rightHalf);
-        if (childStr !== leftHalf) {
-          delete this.children[childStr];
-        }
+        
         break;
       }
     }
@@ -45,38 +54,33 @@ Trie.prototype.learn = function(word) {
   }
 };
 
-Trie.prototype.find = function(word, index) {
-  //Given a string
-  index = index || 0;
-  var ret = null;
-  var _this = this;
-  _.each(this.children, function(childTrie, child) {
-    if (child[0] === word[index]) {
-      if (child === word.substring(index)) {   //if this child is the word prefix looking for return it
-        ret = {};
-        ret.node = _this;
-        ret.path = child;
-        return;
-      }
-      else if (child.length > word.length - index) {   //if child length > than word length return it if the letters match up
-        if (child.substring(0,word.length-index) === word.substring(index)){
-          ret = {};
-          ret.node = _this;
-          ret.path = child;
-          return;
+Trie.prototype.find = function(word, path) {
+  //Given a string find the furthest node that matches that string
+  path = path || "";
+  for (var child in this.children) {
+    if (child[0] === word[0]) {
+        if (word.length <= child.length) { //our search will end with this child
+          if (child.substring(0, word.length) === word) {
+            var ret = {};
+            ret.node = this;
+            ret.path = child;
+            ret.fullPath = path += child;
+            return ret;
+          }
         }
-      } else {    //the word is longer than this child
-        if (child === word.substring(index, child.length)) {//check if the first part of the word matches this node
-          index += child.length;   //if it does add to the index
-          ret = {};
-          ret.path = child;
-          ret.node = childTrie.find(word, index);
-          return;
+        else { // the query is longer than the child 
+               // if the first part of the query matches the childs key
+               // go into the child poping off the part of the query that matches the child
+               // then call find on that child with the remaining query
+          if (word.substring(0, child.length) === child) {
+            word = word.substring(child.length);
+            return this.children[child].find(word, path + child);
+          }
+
         }
-      }
     }
-  });
-  return ret;
+  }
+  return null;
 };
 
 Trie.prototype.getWords = function(words, currentWord) {
@@ -99,16 +103,12 @@ Trie.prototype.getWords = function(words, currentWord) {
 
 Trie.prototype.autoComplete = function(prefix) {
   var found = this.find(prefix);
-  if (found !== null) {
-    currentWord = '';
-    var f = found;
-    var lastPath = found.path;
-    while (f.path !== undefined) {
-      currentWord += f.path;
-      lastPath = f.path;
-      f = f.node;
+  if (found !== undefined && found !== null) {
+    var currentWord = found.path;
+    if (prefix.length > currentWord) {
+      currentWord = prefix;
     }
-    return f.children[lastPath].getWords([], currentWord);
+    return found.node.children[found.path].getWords([], found.fullPath);
   }
   return [];
 };
